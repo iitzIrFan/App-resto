@@ -1,0 +1,51 @@
+import { Product } from "../types";
+
+export const INITIAL_PRODUCTS: Product[] = [
+  {
+    id: '1',
+    name: 'Butter Chicken Masala',
+    price: 299,
+    offerPrice: 249,
+    description: 'Rich and creamy curry made with tender chicken pieces.',
+    category: 'Main Course',
+    imageUrl: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    isVeg: false,
+  },
+  {
+    id: '2',
+    name: 'Paneer Tikka Masala',
+    price: 249,
+    description: 'Marinated paneer cheese served in a spiced gravy.',
+    category: 'Main Course',
+    imageUrl: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    isVeg: true,
+  },
+  {
+    id: '3',
+    name: 'Chicken Biryani',
+    price: 329,
+    offerPrice: 279,
+    description: 'Aromatic basmati rice cooked with spices and chicken.',
+    category: 'Rice & Biryani',
+    imageUrl: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    isVeg: false,
+  },
+  {
+    id: '4',
+    name: 'Veg Biryani',
+    price: 229,
+    description: 'Flavorful rice dish loaded with vegetables and spices.',
+    category: 'Rice & Biryani',
+    imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    isVeg: true,
+  },
+  {
+    id: '5',
+    name: 'Garlic Naan',
+    price: 60,
+    description: 'Oven-baked flatbread topped with garlic and butter.',
+    category: 'Breads',
+    imageUrl: 'https://images.unsplash.com/photo-1626074353765-517a681e40be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    isVeg: true,
+  },
+];
