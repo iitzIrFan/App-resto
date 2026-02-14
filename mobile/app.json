@@ -26,6 +26,7 @@
         "backgroundColor": "#7A0C0C"
       },
       "package": "com.yummyfi.app",
+      "googleServicesFile": "./google-services.json",
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
     "web": {

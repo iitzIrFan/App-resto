@@ -11,14 +11,27 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Check if user is admin by email OR by admin document
+    function isAdminByEmail() {
+      return isAuthenticated() && (
+        request.auth.token.email == '11sciirfans@gmail.com' ||
+        request.auth.token.email == 'piyushthawale7@gmail.com' ||
+        request.auth.token.email == 'yummyfi.official@gmail.com'
+      );
+    }
+
     function isAdmin() {
-      return isAuthenticated() &&
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isAuthenticated() && (
+        isAdminByEmail() ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
     }
 
     function isSuperAdmin() {
-      return isAdmin() &&
-        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'super_admin';
+      return isAdminByEmail() || (
+        isAdmin() &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'super_admin'
+      );
     }
 
     // ========== USERS ==========
@@ -85,13 +98,19 @@ service cloud.firestore {
     // ========== ADMINS ==========
     match /admins/{adminId} {
       allow read: if isAdmin();
-      // Allow users to create their own admin document on first login (bootstrap)
-      // But only if it doesn't already exist
-      allow create: if isAuthenticated() && 
-        request.auth.uid == adminId && 
-        !exists(/databases/$(database)/documents/admins/$(adminId));
-      // Only super_admin can update/delete admin documents
-      allow update, delete: if isSuperAdmin();
+      // Allow admin emails to create/update their own admin document
+      allow create, update: if isAuthenticated() && (
+        isAdminByEmail() ||
+        (request.auth.uid == adminId && !exists(/databases/$(database)/documents/admins/$(adminId)))
+      );
+      // Only super_admin can delete admin documents
+      allow delete: if isSuperAdmin();
     }
+
+    // ========== DEVELOPMENT MODE (REMOVE IN PRODUCTION) ==========
+    // Uncomment below for initial setup, then comment out after creating admin accounts
+    // match /{document=**} {
+    //   allow read, write: if true;
+    // }
   }
 }
