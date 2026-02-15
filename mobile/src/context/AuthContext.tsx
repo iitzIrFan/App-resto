@@ -2,6 +2,9 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import {
     onAuthStateChanged,
     signInWithCredential,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    updateProfile,
     GoogleAuthProvider,
     signOut as firebaseSignOut,
     User,
@@ -18,6 +21,8 @@ interface AuthContextType {
     isAuthenticated: boolean;
     needsRoleSelection: boolean;
     signInWithGoogleToken: (idToken: string) => Promise<User>;
+    signIn: (email: string, pass: string) => Promise<User>;
+    signUp: (email: string, pass: string, name: string) => Promise<User>;
     signOut: () => Promise<void>;
     updateUserProfile: (data: Partial<AppUser>) => Promise<void>;
     setUserRole: (role: UserRole, additionalData?: Partial<AppUser>) => Promise<void>;
@@ -85,6 +90,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return result.user;
     };
 
+    const signIn = async (email: string, pass: string): Promise<User> => {
+        const result = await signInWithEmailAndPassword(auth, email, pass);
+        await loadUserProfile(result.user);
+        return result.user;
+    };
+
+    const signUp = async (email: string, pass: string, name: string): Promise<User> => {
+        const result = await createUserWithEmailAndPassword(auth, email, pass);
+
+        // Update profile with name
+        await updateProfile(result.user, {
+            displayName: name
+        });
+
+        // Initialize user profile in Firestore
+        // We do this explicitly here to ensure the name is captured correctly
+        // even if onAuthStateChanged triggers first
+        const newUser: Partial<AppUser> = {
+            uid: result.user.uid,
+            email: email,
+            displayName: name,
+            createdAt: new Date().toISOString(),
+            addresses: [],
+            favorites: [],
+            // Role will be processed by loadUserProfile or subsequent logic
+        };
+
+        await setDoc(doc(db, 'users', result.user.uid), newUser, { merge: true });
+
+        await loadUserProfile(result.user);
+
+        return result.user;
+    };
+
     const signOut = async () => {
         await firebaseSignOut(auth);
         await AsyncStorage.clear();
@@ -145,6 +184,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 isAuthenticated: !!user,
                 needsRoleSelection,
                 signInWithGoogleToken,
+                signIn,
+                signUp,
                 signOut,
                 updateUserProfile,
                 setUserRole,
