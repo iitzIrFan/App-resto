@@ -20,7 +20,7 @@ interface AuthContextType {
     loading: boolean;
     isAuthenticated: boolean;
     needsRoleSelection: boolean;
-    signInWithGoogleToken: (idToken: string) => Promise<User>;
+    signInWithGoogleToken: (idToken: string | null, accessToken?: string | null) => Promise<User>;
     signIn: (email: string, pass: string) => Promise<User>;
     signUp: (email: string, pass: string, name: string) => Promise<User>;
     signOut: () => Promise<void>;
@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             setUser(firebaseUser);
             if (firebaseUser) {
+                console.log('AuthStateChanged: User is logged in:', firebaseUser.uid);
                 await loadUserProfile(firebaseUser);
             } else {
                 setAppUser(null);
@@ -75,16 +76,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     createdAt: new Date().toISOString(),
                     // role will be set after selection
                 };
-                await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
+                try {
+                    await setDoc(doc(db, 'users', firebaseUser.uid), newUser, { merge: true });
+                    console.log('User document created in Firestore for:', firebaseUser.uid);
+                } catch (e) {
+                    console.error('Error creating user document:', e);
+                }
                 setAppUser(newUser as AppUser);
             }
         } catch (error) {
             console.error('Error loading user profile:', error);
+            // Fallback: set basic app user from firebaseUser even if Firestore fails
+            const fallbackUser: Partial<AppUser> = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email || '',
+                displayName: firebaseUser.displayName || 'User',
+                photoURL: firebaseUser.photoURL || undefined,
+            };
+            setAppUser(fallbackUser as AppUser);
         }
     };
 
-    const signInWithGoogleToken = async (idToken: string): Promise<User> => {
-        const credential = GoogleAuthProvider.credential(idToken);
+    const signInWithGoogleToken = async (idToken: string | null, accessToken?: string | null): Promise<User> => {
+        const credential = GoogleAuthProvider.credential(idToken, accessToken);
         const result = await signInWithCredential(auth, credential);
         await loadUserProfile(result.user);
         return result.user;
