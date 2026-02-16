@@ -49,6 +49,7 @@ function RootLayoutNav() {
                     animation: 'slide_from_bottom',
                 }}
             />
+            <Stack.Screen name="more" options={{ headerShown: false }} />
             {/* product/[id] and tracking/[id] routes can be added here once their files are created */}
         </Stack>
     );
