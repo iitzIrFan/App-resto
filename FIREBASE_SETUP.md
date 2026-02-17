@@ -113,12 +113,7 @@ VITE_FIREBASE_APP_ID=1:915590299815:web:bbc4c94bac15f3d5901b82
    - Replace the VITE*FIREBASE*\* values with your config:
 
    ```dotenv
-   VITE_FIREBASE_API_KEY=your_api_key_here
-   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
+ 
    ```
 
 3. **Firebase Configuration in Code**
@@ -154,22 +149,7 @@ The admin dashboard is a separate Vite app for restaurant management.
 
 ### Current Configuration
 
-```dotenv
-# Admin .env - Web App Configuration
-VITE_FIREBASE_API_KEY=AIzaSyCOtVFEKK7fr6acQ6wnGSPbJZVwWm2xyyM
-VITE_FIREBASE_AUTH_DOMAIN=ankit-yummy-fi.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=ankit-yummy-fi
-VITE_FIREBASE_STORAGE_BUCKET=ankit-yummy-fi.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=915590299815
-VITE_FIREBASE_APP_ID=1:915590299815:web:bbc4c94bac15f3d5901b82
-
-# Mobile App Firebase Config (for reference)
-EXPO_PUBLIC_FIREBASE_API_KEY=AIzaSyDUrihBYEhQc0YPoPDDxTHQKnmvGy9RdVA
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=ankit-yummy-fi-native.firebaseapp.com
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=ankit-yummy-fi-native
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=ankit-yummy-fi-native.firebasestorage.app
-EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=663086875847
-EXPO_PUBLIC_FIREBASE_APP_ID=1:663086875847:android:a1cfa01f22fe5e7d13eae2
+ 
 ```
 
 ### Setup Steps for Admin Dashboard
@@ -207,13 +187,7 @@ The mobile app uses Expo and requires EXPO*PUBLIC* prefixed environment variable
 ### Current Configuration
 
 ```dotenv
-# Mobile .env - React Native App Configuration
-EXPO_PUBLIC_FIREBASE_API_KEY=AIzaSyDUrihBYEhQc0YPoPDDxTHQKnmvGy9RdVA
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=ankit-yummy-fi-native.firebaseapp.com
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=ankit-yummy-fi-native
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=ankit-yummy-fi-native.firebasestorage.app
-EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=663086875847
-EXPO_PUBLIC_FIREBASE_APP_ID=1:663086875847:android:a1cfa01f22fe5e7d13eae2
+ 
 ```
 
 ### React Native Firebase Setup Steps
@@ -242,13 +216,7 @@ npx expo install firebase
    - Check `mobile/src/config/firebase.ts`:
    ```typescript
    const firebaseConfig = {
-     apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-     authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-     projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-     storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-     messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-     appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-   };
+  
    ```
 
 #### Step 3: Android Specific Setup
@@ -474,8 +442,7 @@ npx expo start
 5. **"Missing or insufficient permissions" (Critical Fix Applied)**
    - **Solution**: Updated firestore.rules to allow email-based admin access
    - The rules now check if your email matches the authorized admin emails
-   - Authorized emails: `11sciirfans@gmail.com`, `piyushthawale7@gmail.com`, `yummyfi.official@gmail.com`
-   - **Deploy rules**: Run `firebase deploy --only firestore:rules`
+ 
    - **Auto-create admin**: Just login to admin dashboard, it will create your admin document automatically
 
 6. **Admin can't create products/orders**
