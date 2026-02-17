@@ -19,7 +19,12 @@ export default function CartScreen() {
     const router = useRouter();
     const { cart, updateQuantity, removeFromCart, clearCart, cartTotal } = useApp();
 
-    const deliveryFee = cart.length > 0 ? 40 : 0;
+    // Check if all items are from Dining category (no delivery fee for dine-in)
+    const isDiningOnly = cart.length > 0 && cart.every(item => 
+        item.category.toLowerCase() === 'dining' || item.category.toLowerCase() === 'dinning'
+    );
+    
+    const deliveryFee = (cart.length > 0 && !isDiningOnly) ? 40 : 0;
     const taxes = Math.round(cartTotal * 0.05);
     const grandTotal = cartTotal + deliveryFee + taxes;
 

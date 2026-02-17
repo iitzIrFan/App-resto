@@ -38,9 +38,14 @@ export const CartScreen = () => {
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('upi');
     const [loading, setLoading] = useState(false);
 
+    // Check if all cart items are from Dining category (no delivery fee for dine-in)
+    const isDiningOnly = cart.length > 0 && cart.every(item => 
+        item.category.toLowerCase() === 'dining' || item.category.toLowerCase() === 'dinning'
+    );
+    
     const deliveryFee = settings?.deliveryFee ?? 0;
     const freeDeliveryAbove = settings?.freeDeliveryAbove ?? 0;
-    const isFreeDelivery = cartTotal >= freeDeliveryAbove;
+    const isFreeDelivery = cartTotal >= freeDeliveryAbove || isDiningOnly;
     const finalAmount = Math.max(0, cartTotal + (isFreeDelivery ? 0 : deliveryFee) - discount);
 
     const handleApplyCoupon = async () => {
@@ -232,7 +237,7 @@ export const CartScreen = () => {
                     <View style={styles.billRow}>
                         <Text style={styles.billLabel}>Delivery Fee</Text>
                         <Text style={[styles.billValue, isFreeDelivery && { color: Colors.status.success }]}>
-                            {isFreeDelivery ? 'FREE' : `₹${deliveryFee}`}
+                            {isDiningOnly ? 'DINE-IN' : isFreeDelivery ? 'FREE' : `₹${deliveryFee}`}
                         </Text>
                     </View>
                     {discount > 0 && appliedCoupon && (
