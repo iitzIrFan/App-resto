@@ -90,6 +90,7 @@ export default function DiningScreen() {
                 onAddToCart={() => handleAddToCart(item)}
                 isFavorite={favorites.includes(item.id)}
                 onToggleFavorite={() => toggleFavorite(item.id)}
+                showDescription={true}
             />
         </View>
     );
