@@ -27,6 +27,7 @@ interface ProductCardProps {
     onAddToCart: () => void;
     isFavorite: boolean;
     onToggleFavorite: () => void;
+    showDescription?: boolean;
 }
 
 export const ProductCard = ({
@@ -35,6 +36,7 @@ export const ProductCard = ({
     onAddToCart,
     isFavorite,
     onToggleFavorite,
+    showDescription = false,
 }: ProductCardProps) => {
     const scale = useSharedValue(1);
 
@@ -94,9 +96,15 @@ export const ProductCard = ({
                 <Text style={styles.name} numberOfLines={1}>
                     {product.name}
                 </Text>
-                <Text style={styles.category} numberOfLines={1}>
-                    {product.category}
-                </Text>
+                {showDescription ? (
+                    <Text style={styles.description} numberOfLines={2}>
+                        {product.description}
+                    </Text>
+                ) : (
+                    <Text style={styles.category} numberOfLines={1}>
+                        {product.category}
+                    </Text>
+                )}
                 <View style={styles.priceRow}>
                     <View style={styles.priceContainer}>
                         <Text style={styles.price}>₹{product.offerPrice || product.price}</Text>
@@ -193,6 +201,12 @@ const styles = StyleSheet.create({
         fontSize: FontSize.xs,
         color: Colors.text.secondary,
         marginBottom: Spacing.sm,
+    },
+    description: {
+        fontSize: FontSize.xs,
+        color: Colors.text.secondary,
+        marginBottom: Spacing.sm,
+        lineHeight: 16,
     },
     priceRow: {
         flexDirection: 'row',
