@@ -12,20 +12,25 @@ function RootLayoutNav() {
     const router = useRouter();
 
     useEffect(() => {
-        if (loading) return;
+        if (loading) {
+            console.log('RootLayoutNav: Loading...');
+            return;
+        }
 
         const inAuthGroup = segments[0] === 'auth';
-        console.log('RootLayoutNav: user=', user?.email, 'inAuthGroup=', inAuthGroup, 'segments=', segments);
+        
+        console.log('RootLayoutNav: user=', user?.email || 'null', 
+                    'inAuthGroup=', inAuthGroup,
+                    'segments=', segments);
 
         if (!user && !inAuthGroup) {
             // Redirect to login if user is not authenticated and not in auth group
-            router.replace('/auth/sign-in');
+            console.log('Redirecting to sign-in (user not authenticated)');
+            setTimeout(() => router.replace('/auth/sign-in'), 0);
         } else if (user && inAuthGroup) {
             // Redirect to tabs if user is authenticated and in auth group
-            // Using a small timeout to ensure navigation occurs after render cycle
-            setTimeout(() => {
-                router.replace('/(tabs)');
-            }, 0);
+            console.log('Redirecting to tabs (user authenticated)');
+            setTimeout(() => router.replace('/(tabs)'), 0);
         }
     }, [user, loading, segments]);
 

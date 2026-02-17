@@ -3,6 +3,7 @@ import {
   initializeAuth,
   getAuth,
   browserLocalPersistence,
+  Auth,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -29,7 +30,7 @@ export const isFirebaseConfigured = (): boolean => {
 const app = initializeApp(firebaseConfig);
 
 // Use different auth persistence for web vs native
-let auth;
+let auth: Auth;
 if (Platform.OS === "web") {
   auth = initializeAuth(app, {
     persistence: browserLocalPersistence,

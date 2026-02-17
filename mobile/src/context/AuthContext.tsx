@@ -38,11 +38,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            console.log('AuthStateChanged: firebaseUser=', firebaseUser?.email || 'null');
             setUser(firebaseUser);
             if (firebaseUser) {
                 console.log('AuthStateChanged: User is logged in:', firebaseUser.uid);
                 await loadUserProfile(firebaseUser);
             } else {
+                console.log('AuthStateChanged: User is signed out, clearing state');
                 setAppUser(null);
                 setNeedsRoleSelection(false);
             }
@@ -139,9 +141,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const signOut = async () => {
-        await firebaseSignOut(auth);
-        await AsyncStorage.clear();
-        setAppUser(null);
+        try {
+            console.log('SignOut: Starting sign out process');
+            // Clear app-specific user data (but preserve other AsyncStorage data)
+            await AsyncStorage.removeItem('userRole');
+            await AsyncStorage.removeItem('userProfile');
+            // Sign out from Firebase - this will trigger onAuthStateChanged
+            await firebaseSignOut(auth);
+            console.log('SignOut: Firebase sign out complete');
+            // Do NOT manually set state here - let onAuthStateChanged handle it
+        } catch (error) {
+            console.error('Error signing out:', error);
+            throw error;
+        }
     };
 
     const updateUserProfile = async (data: Partial<AppUser>) => {
