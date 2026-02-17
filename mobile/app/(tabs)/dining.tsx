@@ -1,110 +1,180 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable } from 'react-native';
-import { Image } from 'expo-image';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, TextInput, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { ProductCard } from '../../src/components/ProductCard';
+import { useApp } from '../../src/context/AppContext';
+import { Product } from '../../src/types';
 
 const MAROON = '#7A0C0C';
 const CREAM = '#FFF8F3';
 
-const RESTAURANTS = [
-    {
-        id: '1',
-        name: 'Paradise Biryani',
-        cuisine: 'Hyderabadi • Biryani',
-        rating: 4.5,
-        distance: '2.5 km',
-        time: '30-35 min',
-        image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400',
-    },
-    {
-        id: '2',
-        name: 'Pizza Hut',
-        cuisine: 'Italian • Pizza',
-        rating: 4.2,
-        distance: '1.8 km',
-        time: '25-30 min',
-        image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400',
-    },
-    {
-        id: '3',
-        name: 'Chinese Wok',
-        cuisine: 'Chinese • Noodles',
-        rating: 4.0,
-        distance: '3.2 km',
-        time: '40-45 min',
-        image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400',
-    },
-    {
-        id: '4',
-        name: 'Burger King',
-        cuisine: 'American • Burgers',
-        rating: 4.3,
-        distance: '1.2 km',
-        time: '20-25 min',
-        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400',
-    },
-];
-
 export default function DiningScreen() {
+    const router = useRouter();
+    const { products, productsLoading, favorites, toggleFavorite, addToCart } = useApp();
+    
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activeFilter, setActiveFilter] = useState<'all' | 'veg' | 'nonveg'>('all');
+
+    // Filter products by "Dining" category
+    const diningProducts = useMemo(() => {
+        let filtered = products.filter(p => 
+            p.category.toLowerCase() === 'dining' || p.category.toLowerCase() === 'dinning'
+        );
+
+        // Apply veg filter
+        if (activeFilter === 'veg') {
+            filtered = filtered.filter(p => p.isVeg);
+        } else if (activeFilter === 'nonveg') {
+            filtered = filtered.filter(p => !p.isVeg);
+        }
+
+        // Apply search filter
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            filtered = filtered.filter(p =>
+                p.name.toLowerCase().includes(q) ||
+                p.description.toLowerCase().includes(q)
+            );
+        }
+
+        return filtered;
+    }, [products, searchQuery, activeFilter]);
+
+    const handleProductPress = (product: Product) => {
+        // TODO: Navigate to product detail screen
+        // router.push(`/product/${product.id}`);
+        console.log('Product pressed:', product.name);
+    };
+
+    const handleAddToCart = (product: Product) => {
+        addToCart(product);
+    };
+
+    const renderEmptyState = () => {
+        if (productsLoading) {
+            return (
+                <View style={styles.emptyContainer}>
+                    <Ionicons name="restaurant-outline" size={64} color="#D1D5DB" />
+                    <Text style={styles.emptyText}>Loading dining products...</Text>
+                </View>
+            );
+        }
+
+        if (searchQuery.trim()) {
+            return (
+                <View style={styles.emptyContainer}>
+                    <Ionicons name="search-outline" size={64} color="#D1D5DB" />
+                    <Text style={styles.emptyText}>No products found</Text>
+                    <Text style={styles.emptySubtext}>Try a different search term</Text>
+                </View>
+            );
+        }
+
+        return (
+            <View style={styles.emptyContainer}>
+                <Ionicons name="restaurant-outline" size={64} color="#D1D5DB" />
+                <Text style={styles.emptyText}>No dining products available</Text>
+                <Text style={styles.emptySubtext}>
+                    Please create a "Dining" category and add products to it in the admin panel
+                </Text>
+            </View>
+        );
+    };
+
+    const renderProductItem = ({ item, index }: { item: Product; index: number }) => (
+        <View style={styles.productItem}>
+            <ProductCard
+                product={item}
+                onPress={() => handleProductPress(item)}
+                onAddToCart={() => handleAddToCart(item)}
+                isFavorite={favorites.includes(item.id)}
+                onToggleFavorite={() => toggleFavorite(item.id)}
+            />
+        </View>
+    );
+
     return (
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Dine Out</Text>
-                <Text style={styles.headerSubtitle}>Discover restaurants near you</Text>
+                <Text style={styles.headerTitle}>Dine In</Text>
+                <Text style={styles.headerSubtitle}>Discover dining menu items</Text>
             </View>
 
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                {/* Search and Filter */}
-                <View style={styles.searchContainer}>
-                    <View style={styles.searchBox}>
-                        <Ionicons name="search" size={20} color="#9CA3AF" />
-                        <Text style={styles.searchPlaceholder}>Search restaurants...</Text>
-                    </View>
-                    <Pressable style={styles.filterBtn}>
-                        <Ionicons name="options" size={20} color={MAROON} />
-                    </Pressable>
-                </View>
-
-                {/* Quick Filters */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll}>
-                    {['All', 'Pure Veg', 'Rating 4.0+', 'Near Me', 'Offers'].map((filter, idx) => (
-                        <Pressable key={idx} style={[styles.filterChip, idx === 0 && styles.filterChipActive]}>
-                            <Text style={[styles.filterChipText, idx === 0 && styles.filterChipTextActive]}>
-                                {filter}
-                            </Text>
+            {/* Search Bar */}
+            <View style={styles.searchContainer}>
+                <View style={styles.searchBox}>
+                    <Ionicons name="search" size={20} color="#9CA3AF" />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search products..."
+                        placeholderTextColor="#9CA3AF"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                    />
+                    {searchQuery ? (
+                        <Pressable onPress={() => setSearchQuery('')}>
+                            <Ionicons name="close-circle" size={20} color="#9CA3AF" />
                         </Pressable>
-                    ))}
-                </ScrollView>
-
-                {/* Restaurant List */}
-                <View style={styles.restaurantsList}>
-                    {RESTAURANTS.map((restaurant) => (
-                        <Pressable key={restaurant.id} style={styles.restaurantCard}>
-                            <Image source={{ uri: restaurant.image }} style={styles.restaurantImage} />
-                            <View style={styles.restaurantInfo}>
-                                <Text style={styles.restaurantName}>{restaurant.name}</Text>
-                                <Text style={styles.restaurantCuisine}>{restaurant.cuisine}</Text>
-                                <View style={styles.restaurantMeta}>
-                                    <View style={styles.ratingBadge}>
-                                        <Ionicons name="star" size={12} color="#FFFFFF" />
-                                        <Text style={styles.ratingText}>{restaurant.rating}</Text>
-                                    </View>
-                                    <Text style={styles.metaText}>{restaurant.distance}</Text>
-                                    <Text style={styles.metaDot}>•</Text>
-                                    <Text style={styles.metaText}>{restaurant.time}</Text>
-                                </View>
-                            </View>
-                            <Pressable style={styles.bookmarkBtn}>
-                                <Ionicons name="bookmark-outline" size={20} color="#6B7280" />
-                            </Pressable>
-                        </Pressable>
-                    ))}
+                    ) : null}
                 </View>
+            </View>
+
+            {/* Filter Chips */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll}>
+                <Pressable 
+                    style={[styles.filterChip, activeFilter === 'all' && styles.filterChipActive]}
+                    onPress={() => setActiveFilter('all')}
+                >
+                    <Text style={[styles.filterChipText, activeFilter === 'all' && styles.filterChipTextActive]}>
+                        All
+                    </Text>
+                </Pressable>
+                <Pressable 
+                    style={[styles.filterChip, activeFilter === 'veg' && styles.filterChipActive]}
+                    onPress={() => setActiveFilter('veg')}
+                >
+                    <View style={[styles.vegDot, { backgroundColor: '#22C55E' }]} />
+                    <Text style={[styles.filterChipText, activeFilter === 'veg' && styles.filterChipTextActive]}>
+                        Veg Only
+                    </Text>
+                </Pressable>
+                <Pressable 
+                    style={[styles.filterChip, activeFilter === 'nonveg' && styles.filterChipActive]}
+                    onPress={() => setActiveFilter('nonveg')}
+                >
+                    <View style={[styles.vegDot, { backgroundColor: '#EF4444' }]} />
+                    <Text style={[styles.filterChipText, activeFilter === 'nonveg' && styles.filterChipTextActive]}>
+                        Non-Veg
+                    </Text>
+                </Pressable>
             </ScrollView>
+
+            {/* Products Grid */}
+            {diningProducts.length === 0 ? (
+                <ScrollView 
+                    style={styles.scrollView} 
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {renderEmptyState()}
+                </ScrollView>
+            ) : (
+                <FlatList
+                    data={diningProducts}
+                    renderItem={renderProductItem}
+                    keyExtractor={(item) => item.id}
+                    numColumns={2}
+                    contentContainerStyle={styles.productsGrid}
+                    showsVerticalScrollIndicator={false}
+                    columnWrapperStyle={styles.columnWrapper}
+                />
+            )}
         </SafeAreaView>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -125,16 +195,10 @@ const styles = StyleSheet.create({
         color: '#FFF8F3',
         marginTop: 4,
     },
-    scrollView: {
-        flex: 1,
-    },
     searchContainer: {
-        flexDirection: 'row',
         padding: 16,
-        gap: 12,
     },
     searchBox: {
-        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#FFFFFF',
@@ -143,23 +207,19 @@ const styles = StyleSheet.create({
         height: 48,
         gap: 8,
     },
-    searchPlaceholder: {
-        color: '#9CA3AF',
+    searchInput: {
+        flex: 1,
         fontSize: 14,
-    },
-    filterBtn: {
-        width: 48,
-        height: 48,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
+        color: '#111827',
     },
     filtersScroll: {
         paddingHorizontal: 16,
         marginBottom: 16,
+        flexGrow: 0,
     },
     filterChip: {
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 8,
         backgroundColor: '#FFFFFF',
@@ -167,6 +227,7 @@ const styles = StyleSheet.create({
         marginRight: 8,
         borderWidth: 1,
         borderColor: '#E5E7EB',
+        gap: 6,
     },
     filterChipActive: {
         backgroundColor: MAROON,
@@ -179,66 +240,47 @@ const styles = StyleSheet.create({
     filterChipTextActive: {
         color: '#FFFFFF',
     },
-    restaurantsList: {
-        paddingHorizontal: 16,
-    },
-    restaurantCard: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        marginBottom: 16,
-        overflow: 'hidden',
-        flexDirection: 'row',
-        position: 'relative',
-    },
-    restaurantImage: {
-        width: 100,
-        height: 100,
-    },
-    restaurantInfo: {
-        flex: 1,
-        padding: 12,
-        justifyContent: 'center',
-    },
-    restaurantName: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    restaurantCuisine: {
-        fontSize: 12,
-        color: '#6B7280',
-        marginTop: 2,
-    },
-    restaurantMeta: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 8,
-        gap: 8,
-    },
-    ratingBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#22C55E',
-        paddingHorizontal: 6,
-        paddingVertical: 2,
+    vegDot: {
+        width: 8,
+        height: 8,
         borderRadius: 4,
-        gap: 2,
     },
-    ratingText: {
-        color: '#FFFFFF',
-        fontSize: 12,
+    scrollView: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
+    },
+    productsGrid: {
+        padding: 16,
+        paddingTop: 0,
+    },
+    columnWrapper: {
+        justifyContent: 'space-between',
+    },
+    productItem: {
+        width: '48%',
+        marginBottom: 16,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 32,
+        paddingVertical: 64,
+    },
+    emptyText: {
+        fontSize: 18,
         fontWeight: '600',
+        color: '#374151',
+        marginTop: 16,
+        textAlign: 'center',
     },
-    metaText: {
-        fontSize: 12,
+    emptySubtext: {
+        fontSize: 14,
         color: '#6B7280',
-    },
-    metaDot: {
-        color: '#D1D5DB',
-    },
-    bookmarkBtn: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
+        marginTop: 8,
+        textAlign: 'center',
+        lineHeight: 20,
     },
 });
