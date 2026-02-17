@@ -56,21 +56,46 @@ export default function MoreScreen() {
         .slice(0, 2);
 
     const handleSignOut = async () => {
-        Alert.alert(
-            'Sign Out',
-            'Are you sure you want to sign out?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Sign Out',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try { await signOut(); }
-                        catch (e) { console.error('Sign out error:', e); }
-                    }
-                },
-            ]
-        );
+        console.log('handleSignOut button clicked');
+        
+        // For web, Alert doesn't work well, so use window.confirm
+        if (Platform.OS === 'web') {
+            const confirmed = window.confirm('Are you sure you want to sign out?');
+            if (confirmed) {
+                try {
+                    console.log('User initiated sign out (web)');
+                    await signOut();
+                    console.log('Sign out complete, navigating to sign-in');
+                    router.replace('/auth/sign-in');
+                } catch (e) {
+                    console.error('Sign out error:', e);
+                    window.alert('Failed to sign out. Please try again.');
+                }
+            }
+        } else {
+            Alert.alert(
+                'Sign Out',
+                'Are you sure you want to sign out?',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Sign Out',
+                        style: 'destructive',
+                        onPress: async () => {
+                            try {
+                                console.log('User initiated sign out (native)');
+                                await signOut();
+                                console.log('Sign out complete, navigating to sign-in');
+                                router.replace('/auth/sign-in');
+                            } catch (e) {
+                                console.error('Sign out error:', e);
+                                Alert.alert('Error', 'Failed to sign out. Please try again.');
+                            }
+                        }
+                    },
+                ]
+            );
+        }
     };
 
     return (
