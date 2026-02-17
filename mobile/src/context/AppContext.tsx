@@ -308,9 +308,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const placeOrder = async (orderData: Partial<Order>): Promise<string | null> => {
         if (!user || cart.length === 0) return null;
 
+            // Check if all items are from Dining category (no delivery fee for dine-in)
+            const isDiningOnly = cart.every(item => 
+                item.category.toLowerCase() === 'dining' || item.category.toLowerCase() === 'dinning'
+            );
+            
             const deliveryFee = settings?.deliveryFee ?? 0;
             const freeDeliveryAbove = settings?.freeDeliveryAbove ?? 0;
-            const isFreeDelivery = cartTotal >= freeDeliveryAbove;
+            const isFreeDelivery = cartTotal >= freeDeliveryAbove || isDiningOnly;
             const total = cartTotal;
             const finalAmount = Math.max(0, total + (isFreeDelivery ? 0 : deliveryFee) - (orderData.discount || 0));
 

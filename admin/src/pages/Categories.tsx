@@ -6,6 +6,7 @@ import { Plus, Trash2, Edit, X, ArrowUp, ArrowDown, Sparkles } from 'lucide-reac
 
 // Popular categories from Zomato/Swiggy for quick add
 const POPULAR_CATEGORIES = [
+    { name: 'Dining', imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop', icon: '🍽️' },
     { name: 'Biryani', imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&h=400&fit=crop', icon: '🍛' },
     { name: 'Pizza', imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=400&fit=crop', icon: '🍕' },
     { name: 'Burger', imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop', icon: '🍔' },
