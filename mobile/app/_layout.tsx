@@ -15,11 +15,17 @@ function RootLayoutNav() {
         if (loading) return;
 
         const inAuthGroup = segments[0] === 'auth';
+        console.log('RootLayoutNav: user=', user?.email, 'inAuthGroup=', inAuthGroup, 'segments=', segments);
 
         if (!user && !inAuthGroup) {
+            // Redirect to login if user is not authenticated and not in auth group
             router.replace('/auth/sign-in');
         } else if (user && inAuthGroup) {
-            router.replace('/(tabs)');
+            // Redirect to tabs if user is authenticated and in auth group
+            // Using a small timeout to ensure navigation occurs after render cycle
+            setTimeout(() => {
+                router.replace('/(tabs)');
+            }, 0);
         }
     }, [user, loading, segments]);
 
@@ -43,6 +49,7 @@ function RootLayoutNav() {
                     animation: 'slide_from_bottom',
                 }}
             />
+            <Stack.Screen name="more" options={{ headerShown: false }} />
             {/* product/[id] and tracking/[id] routes can be added here once their files are created */}
         </Stack>
     );

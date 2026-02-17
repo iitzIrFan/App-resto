@@ -199,9 +199,10 @@ export default function SignIn() {
 
     useEffect(() => {
         if (response?.type === 'success') {
-            const token = response.params?.id_token || response.authentication?.idToken || response.authentication?.accessToken;
-            if (token) {
-                handleGoogleSignIn(token);
+            const idToken = response.params?.id_token || response.authentication?.idToken || null;
+            const accessToken = response.authentication?.accessToken || null;
+            if (idToken || accessToken) {
+                handleGoogleSignIn(idToken, accessToken);
             } else {
                 Alert.alert('Error', 'No authentication token received from Google');
             }
@@ -210,12 +211,13 @@ export default function SignIn() {
         }
     }, [response]);
 
-    const handleGoogleSignIn = async (token: string) => {
+    const handleGoogleSignIn = async (idToken: string | null, accessToken: string | null) => {
         setLoading(true);
         try {
-            await signInWithGoogleToken(token);
+            await signInWithGoogleToken(idToken, accessToken);
             router.replace('/(tabs)');
         } catch (err: any) {
+            console.error('Google Sign In Error:', err);
             Alert.alert('Sign In Error', err.message || 'Something went wrong');
         } finally {
             setLoading(false);
