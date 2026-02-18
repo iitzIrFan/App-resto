@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, query, orderBy } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../firebase';
+import { db } from '../firebase';
 import { Product, Category } from '../types';
+import { uploadToImageKit } from '../utils/imagekitUpload';
 import { Plus, Trash2, Edit, Search, X, Image as ImageIcon, Upload, Link, Loader2, IndianRupee, Percent, Clock, AlignLeft, Type, Tag, Leaf, Save } from 'lucide-react';
 
 export default function Products() {
@@ -38,22 +38,14 @@ export default function Products() {
         setUploadSuccess(false);
 
         try {
-            // Create a unique filename to avoid collisions
-            const timestamp = Date.now();
-            const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-            const storageRef = ref(storage, `products/${timestamp}_${safeName}`);
-
-            // Upload file to Firebase Storage
-            const snapshot = await uploadBytes(storageRef, file);
-
-            // Get the public download URL
-            const downloadURL = await getDownloadURL(snapshot.ref);
-
-            setForm(prev => ({ ...prev, imageUrl: downloadURL }));
+            // Upload to ImageKit
+            const imageUrl = await uploadToImageKit(file);
+            
+            setForm(prev => ({ ...prev, imageUrl: imageUrl }));
             setUploadSuccess(true);
         } catch (err: any) {
             console.error('Upload Error:', err);
-            setUploadError(err.message || 'Upload failed. Check Firebase Storage rules.');
+            setUploadError(err.message || 'Upload failed. Please check your ImageKit configuration.');
         } finally {
             setIsUploading(false);
         }
