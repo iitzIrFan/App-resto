@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
     View, Text, StyleSheet, SafeAreaView, FlatList, Pressable,
-    ActivityIndicator, TextInput, ScrollView,
+    ActivityIndicator, TextInput, ScrollView, Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,6 +26,7 @@ export default function OrdersScreen() {
     const { orders, ordersLoading } = useApp();
     const [filter, setFilter] = useState('All');
     const [search, setSearch] = useState('');
+    const [isFocused, setIsFocused] = useState(false);
 
     // Last 30 days only
     const thirtyDaysAgo = useMemo(() => {
@@ -69,14 +70,22 @@ export default function OrdersScreen() {
             </View>
 
             {/* Search */}
-            <View style={s.searchWrap}>
-                <Ionicons name="search" size={18} color={COLORS.gray400} />
+            <View style={[s.searchWrap, isFocused && s.searchWrapFocused]}>
+                <Ionicons
+                    name="search"
+                    size={20}
+                    color={isFocused ? COLORS.maroon : COLORS.gray400}
+                />
                 <TextInput
                     style={s.searchInput}
                     placeholder="Search orders..."
                     placeholderTextColor={COLORS.gray400}
                     value={search}
                     onChangeText={setSearch}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    underlineColorAndroid="transparent"
+                    selectionColor={COLORS.maroon}
                 />
             </View>
 
@@ -155,16 +164,30 @@ const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.cream },
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        backgroundColor: COLORS.maroon, paddingHorizontal: 16, paddingVertical: 14, paddingTop: 8,
+        backgroundColor: COLORS.maroon, paddingHorizontal: 16, paddingVertical: 14, paddingTop: Platform.OS === 'android' ? 40 : 14,
     },
     backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center', borderRadius: 20 },
     headerTitle: { fontSize: 20, fontWeight: '700', color: COLORS.white },
     searchWrap: {
         flexDirection: 'row', alignItems: 'center', margin: 16, marginBottom: 8,
-        backgroundColor: COLORS.white, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10,
-        borderWidth: 1, borderColor: COLORS.gray200,
+        backgroundColor: '#F4F5F7', borderRadius: 16, paddingHorizontal: 16, height: 52,
+        borderWidth: 1, borderColor: '#E5E7EB', gap: 12,
     },
-    searchInput: { flex: 1, marginLeft: 8, fontSize: 15, color: COLORS.black },
+    searchWrapFocused: {
+        borderColor: COLORS.maroon,
+        backgroundColor: COLORS.white,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    searchInput: {
+        flex: 1, fontSize: 16, color: '#111827',
+        height: '100%', paddingVertical: 0,
+        // @ts-ignore
+        outlineStyle: 'none',
+    },
     chipScroll: { flexGrow: 0, marginBottom: 4 },
     chipRow: { paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
     chip: {

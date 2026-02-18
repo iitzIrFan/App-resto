@@ -8,6 +8,7 @@ import {
     Pressable,
     SafeAreaView,
     Dimensions,
+    Platform,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -22,6 +23,7 @@ export default function SearchScreen() {
     const router = useRouter();
     const { products, addToCart, favorites, toggleFavorite } = useApp();
     const [query, setQuery] = useState('');
+    const [isFocused, setIsFocused] = useState(false);
 
     const filteredProducts = products.filter(
         (p) =>
@@ -34,15 +36,23 @@ export default function SearchScreen() {
         <SafeAreaView style={styles.container}>
             {/* Search Header */}
             <View style={styles.header}>
-                <View style={styles.searchBox}>
-                    <Ionicons name="search" size={20} color="#9CA3AF" />
+                <View style={[styles.searchBox, isFocused && styles.searchBoxFocused]}>
+                    <Ionicons
+                        name="search"
+                        size={20}
+                        color={isFocused ? MAROON : "#9CA3AF"}
+                    />
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search for dishes, restaurants..."
                         placeholderTextColor="#9CA3AF"
                         value={query}
                         onChangeText={setQuery}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
                         autoFocus
+                        underlineColorAndroid="transparent"
+                        selectionColor={MAROON}
                     />
                     {query.length > 0 && (
                         <Pressable onPress={() => setQuery('')}>
@@ -132,6 +142,7 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: 16,
+        paddingTop: Platform.OS === 'android' ? 40 : 16, // Adjusting for status bar if needed, or keeping standard
         backgroundColor: '#FFFFFF',
         borderBottomWidth: 1,
         borderBottomColor: '#E5E7EB',
@@ -139,16 +150,31 @@ const styles = StyleSheet.create({
     searchBox: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F3F4F6',
-        borderRadius: 12,
-        paddingHorizontal: 12,
-        height: 48,
-        gap: 8,
+        backgroundColor: '#F4F5F7',
+        borderRadius: 16,
+        paddingHorizontal: 16,
+        height: 52,
+        gap: 12,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    searchBoxFocused: {
+        borderColor: MAROON, // Soft highlight
+        backgroundColor: '#FFFFFF',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
     },
     searchInput: {
         flex: 1,
         fontSize: 16,
         color: '#111827',
+        height: '100%',
+        paddingVertical: 0,
+        // @ts-ignore
+        outlineStyle: 'none',
     },
     scrollView: {
         flex: 1,
